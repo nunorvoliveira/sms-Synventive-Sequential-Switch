@@ -1,3 +1,5 @@
+// RENAME MASTER TO MAIN
+
  /* SYNVENTIVE SEQUENTIAL SWITCH
 
   This sketch reads the inputs from a rotary switch
