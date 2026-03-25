@@ -1,4 +1,4 @@
-/* SYNVENTIVE SEQUENTIAL SWITCH
+ /* SYNVENTIVE SEQUENTIAL SWITCH
 
   This sketch reads the inputs from a rotary switch
   and open and close buttons and turns on and off
@@ -18,20 +18,20 @@
 */
 
 // Pin definitions
-constexpr int LED_OFF           = 5;
-constexpr int LED_MAN           = 6;
-constexpr int LED_05            = 7;
-constexpr int LED_10            = 8;
-constexpr int LED_20            = 9;
-constexpr int LED_35            = 10;
-constexpr int LED_50            = 11;
-constexpr int LED_95            = 12;
-constexpr int SW_OPEN           = 13;
-constexpr int SW_CLOSE          = 14;
-constexpr int BUZZER            = 15;
-constexpr int ROTARY            = 19;
-constexpr int MF_OPEN           = A2;
+constexpr int LED_OFF           = 2;
+constexpr int LED_MAN           = 3;
+constexpr int LED_05            = 4;
+constexpr int LED_10            = 5;
+constexpr int LED_20            = 6;
+constexpr int LED_35            = 7;
+constexpr int LED_50            = 8;
+constexpr int LED_95            = 9;
+constexpr int BUZZER            = 10;
+constexpr int SW_OPEN           = 11;
+constexpr int SW_CLOSE          = 12;
+constexpr int ROTARY            = A0;
 constexpr int MF_CLOSE          = A1;
+constexpr int MF_OPEN           = A2;
 
 // Variables
 int           LastState         = 0;     // last program state
@@ -125,103 +125,40 @@ void loop() {
 
   // Process current state leds and define delay if needed
   if ( StateChanged == true ) {
+    // Turn all LEDs off
+    TurnStateLEDsOff();
+    // Turn on correct LED and update new delay
     switch (CurrState) {
       case STATE_OFF:
-        // Update outputs
         digitalWrite(LED_OFF,  HIGH);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_OFF;
         break;
       case STATE_MAN:
-        // Update outputs
-        digitalWrite(LED_OFF,  LOW);
         digitalWrite(LED_MAN,  HIGH);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_OFF;
         break;
       case STATE_05:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
         digitalWrite(LED_05,   HIGH);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_05;
         break;
       case STATE_10:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
         digitalWrite(LED_10,   HIGH);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_10;
         break;
       case STATE_20:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
         digitalWrite(LED_20,   HIGH);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_20;
         break;
       case STATE_35:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
         digitalWrite(LED_35,   HIGH);
-        digitalWrite(LED_50,   LOW);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_35;
         break;
       case STATE_50:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
         digitalWrite(LED_50,   HIGH);
-        digitalWrite(LED_95,   LOW);
-        // Update new delay
         CurrDelay = TIME_50;
         break;
       case STATE_95:
-        digitalWrite(LED_OFF,  LOW);
-        digitalWrite(LED_MAN,  LOW);
-        digitalWrite(LED_05,   LOW);
-        digitalWrite(LED_10,   LOW);
-        digitalWrite(LED_20,   LOW);
-        digitalWrite(LED_35,   LOW);
-        digitalWrite(LED_50,   LOW);
         digitalWrite(LED_95,   HIGH);
-        // Update new delay
         CurrDelay = TIME_95;
         break;
     }
@@ -261,16 +198,18 @@ void loop() {
         }
       break;
     }
-    // Check for manual override
-    if ( !digitalRead(SW_OPEN) == true ) {
-      // Open is pressed
-      OpenMosfet = true;
+    // Check for manual override if not in OFF state
+    if ( CurrState != STATE_OFF ) {
+      if ( !digitalRead(SW_OPEN) == HIGH ) {
+        // Open is pressed
+        OpenMosfet = true;
+      }
+      if ( !digitalRead(SW_CLOSE) == HIGH ) {
+        // Close is pressed
+        CloseMosfet = true;
+      }
     }
-    if ( !digitalRead(SW_CLOSE) == true ) {
-      // Close is pressed
-      CloseMosfet = true;
-    }
-    // Check for dual press and fix if needed
+    // Check for duplicated instructions and fix if needed
     if ( OpenMosfet = true && CloseMosfet == true ) {
       // Both buttons pressed, default to close
       OpenMosfet = false;
@@ -303,6 +242,18 @@ void loop() {
     }
   }
 
+}
+
+void TurnStateLEDsOff() {
+  // Turn off all state LEDs
+  digitalWrite(LED_OFF,  LOW);
+  digitalWrite(LED_MAN,  LOW);
+  digitalWrite(LED_05,   LOW);
+  digitalWrite(LED_10,   LOW);
+  digitalWrite(LED_20,   LOW);
+  digitalWrite(LED_35,   LOW);
+  digitalWrite(LED_50,   LOW);
+  digitalWrite(LED_95,   LOW);
 }
 
 int ReadNewState() {
